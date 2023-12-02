@@ -15,7 +15,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,7 +96,6 @@ public class Pay_GUI extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel23 = new javax.swing.JLabel();
         panelBorder1 = new MyDesign.PanelBorder();
         jLabel5 = new javax.swing.JLabel();
         spTable = new javax.swing.JScrollPane();
@@ -128,8 +129,6 @@ public class Pay_GUI extends javax.swing.JPanel {
         cbSach = new javax.swing.JComboBox<>();
         btnChoMuon = new MyDesign.MyButton();
 
-        jLabel23.setText("jLabel23");
-
         setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel5.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
@@ -160,9 +159,6 @@ public class Pay_GUI extends javax.swing.JPanel {
             }
         });
         spTable.setViewportView(tbSachKhaDung);
-        if (tbSachKhaDung.getColumnModel().getColumnCount() > 0) {
-            tbSachKhaDung.getColumnModel().getColumn(0).setMaxWidth(40);
-        }
 
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/search.png"))); // NOI18N
 
@@ -243,7 +239,7 @@ public class Pay_GUI extends javax.swing.JPanel {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("MÃ PHIẾU MƯỢN");
 
-        txtDocGia.setText("");
+        txtDocGia.setText("Nguyễn Tuấn");
 
         jLabel4.setFont(new java.awt.Font("SansSerif", 1, 13)); // NOI18N
         jLabel4.setText("Ngày mượn");
@@ -254,12 +250,12 @@ public class Pay_GUI extends javax.swing.JPanel {
         jLabel7.setFont(new java.awt.Font("SansSerif", 1, 13)); // NOI18N
         jLabel7.setText("Tiền cọc");
 
-        txtNgayMuon.setText("");
+        txtNgayMuon.setText("19/08/2003");
 
-        txtThuKho.setText("");
+        txtThuKho.setText("Quốc Vĩ");
 
         txtTienCoc.setFont(new java.awt.Font("SansSerif", 1, 13)); // NOI18N
-        txtTienCoc.setText("");
+        txtTienCoc.setText("12.000đ");
 
         lbLine.setForeground(new java.awt.Color(204, 204, 204));
         lbLine.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
@@ -284,6 +280,11 @@ public class Pay_GUI extends javax.swing.JPanel {
 
         dtgNgayNhan.setToolTipText("");
         dtgNgayNhan.setDateFormatString("yyyy-MM-dd");
+        dtgNgayNhan.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                dtgNgayNhanPropertyChange(evt);
+            }
+        });
 
         jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel24.setText("Ngày Nhận:");
@@ -342,7 +343,7 @@ public class Pay_GUI extends javax.swing.JPanel {
                                     .addComponent(lbBaoMat))
                                 .addComponent(jLabel2)
                                 .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 6, Short.MAX_VALUE)))
+                        .addGap(0, 18, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         panelBorder2Layout.setVerticalGroup(
@@ -438,19 +439,9 @@ public class Pay_GUI extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void lbBaoMatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbBaoMatMouseClicked
-        // TODO add your handling code here:
-        Component source = (Component) evt.getSource();
-        JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(source);
-        
-        PayReport_Dialog payReportDialog = new PayReport_Dialog(parent, true);
-        payReportDialog.setVisible(true);
-        
-    }//GEN-LAST:event_lbBaoMatMouseClicked
-
     private void btnChoMuonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnChoMuonMouseClicked
         // TODO add your handling code here:
-         Vector<BorrowCard> list;
+        Vector<BorrowCard> list;
         try {
             list = pbus.getAll();
             int n= tbSachKhaDung.getSelectedRow();
@@ -463,25 +454,29 @@ public class Pay_GUI extends javax.swing.JPanel {
                         break;
                     }
                 }
-                Date realDate = dtgNgayNhan.getDate();
-                long songayMuon = pbus.CacluteDate(bc.getStartDate(), bc.getExpReDate() );
-                long ngayTrathucte = pbus.CacluteDate(realDate,bc.getExpReDate());
-                System.out.println(songayMuon +" "+ ngayTrathucte);
+
+                java.util.Date getDate = dtgNgayNhan.getDate();
+                java.sql.Date readDate = new java.sql.Date(getDate.getTime());
+
+                //Thêm 7 ngày
+                LocalDate localDate = readDate.toLocalDate().plusDays(7);
+                java.sql.Date banAccDate = java.sql.Date.valueOf(localDate);
+
+                long songayMuon = pbus.CacluteDate(bc.getStartDate(), bc.getExpReDate());
+                long ngayTrathucte = pbus.CacluteDate(bc.getRealReDate(),bc.getExpReDate());
                 if(ngayTrathucte < 0){
-                    //System.out.println("Trả trễ. Ban acc");
-                    JOptionPane.showMessageDialog(null, "Trả không đúng hạn! Nộp card 20k!");
+                    JOptionPane.showMessageDialog(null, "Trả không đúng hạn! Thẻ sẽ bị khóa đến ngày: "+banAccDate);
+                    pbus.banAcc(bc.getID(), banAccDate);
+                    JOptionPane.showMessageDialog(null, "Nhận thành công!");
                     pbus.RecoverBook(bc);
                 }
-                else if(ngayTrathucte >0 && ngayTrathucte < songayMuon){
-                    //System.out.println("Trả đúng hạn ok ní!");
-                    JOptionPane.showMessageDialog(null, "Trả đúng hạn!");
+                else if(ngayTrathucte >=0 && ngayTrathucte < songayMuon){
                     pbus.RecoverBook(bc);
+                    JOptionPane.showMessageDialog(null, "Nhận thành công!");
                 }
                 else{
-                    //System.out.println("Ngày nhập không đúng thực tế ");
                     JOptionPane.showMessageDialog(null, "Ngày nhận sai thực tế!");
                 }
-                JOptionPane.showMessageDialog(null, "Nhận thành công!");
             }else{
                 JOptionPane.showMessageDialog(null, "Vui lòng chọn phiếu mượn! ");
             }
@@ -505,7 +500,7 @@ public class Pay_GUI extends javax.swing.JPanel {
                     break;
                 }
             }
-            
+
             bc__static = bc;
             System.out.print(bc);
             lbMaPhieuMuon.setText("#PM"+bc.getID());
@@ -513,6 +508,7 @@ public class Pay_GUI extends javax.swing.JPanel {
             txtNgayMuon.setText(String.valueOf(bc.getStartDate()));
             txtThuKho.setText(bc.getStaffname());
             txtTienCoc.setText(String.valueOf(bc.getdeposit())+"đ");
+            dtgNgayNhan.setDate(bc.getRealReDate());
             txtTenSach.setText("");
             txtTacGia.setText("");
             txtSoLuong.setText("");
@@ -558,12 +554,12 @@ public class Pay_GUI extends javax.swing.JPanel {
             });
         } catch (Exception ex) {
             ex.printStackTrace();
-    }
+        }
     }//GEN-LAST:event_tbSachKhaDungMouseClicked
 
     private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
-        // TODO add your handling code here:
-            try {
+         // TODO add your handling code here:
+        try {
             String keyword = txtSearch.getText().toLowerCase();
             if (!keyword.isEmpty()) {
                 Vector<BorrowCard> kq = pbus.getAll();
@@ -576,7 +572,7 @@ public class Pay_GUI extends javax.swing.JPanel {
                         String sName = bc.getStaffname().toLowerCase();
                         String sDate = bc.getStartDate().toString();
                         String eDate = bc.getExpReDate().toString();
-                        
+
                         if(maPM.contains(keyword)||rName.contains(keyword)||sName.contains(keyword)||sDate.contains(keyword)||eDate.contains(keyword)){
                             Object[] row = { bc.getID(), bc.getReadername(), bc.getStartDate(), bc.getExpReDate(), bc.getStaffname() };
                             tableModel.addRow(row);
@@ -591,6 +587,35 @@ public class Pay_GUI extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_txtSearchKeyReleased
 
+    private void lbBaoMatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbBaoMatMouseClicked
+        // TODO add your handling code here:
+        Component source = (Component) evt.getSource();
+        JFrame parent = (JFrame) SwingUtilities.getWindowAncestor(source);
+
+        PayReport_Dialog payReportDialog = new PayReport_Dialog(parent, true);
+        payReportDialog.setVisible(true);
+
+    }//GEN-LAST:event_lbBaoMatMouseClicked
+
+    private void dtgNgayNhanPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_dtgNgayNhanPropertyChange
+         try {
+
+            // TODO add your handling code here:
+            if ("date".equals(evt.getPropertyName())) {
+                java.util.Date utilDate = dtgNgayNhan.getDate();
+                java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+                pbus = new PayBUS();
+                pbus.getRealDate(bc__static.getID(), sqlDate);
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Pay_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Pay_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Pay_GUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_dtgNgayNhanPropertyChange
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private MyDesign.MyButton btnChoMuon;
@@ -600,7 +625,6 @@ public class Pay_GUI extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

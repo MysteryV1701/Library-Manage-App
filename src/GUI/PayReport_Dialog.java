@@ -5,10 +5,12 @@
 package GUI;
 
 import BUS.PayBUS;
+import BUS.StatisticsBUS;
 import DTO.entities.Book1;
 import DTO.entities.DetailBC;
 import static GUI.Pay_GUI.b__static;
 import static GUI.Pay_GUI.bc__static;
+import static GUI.Pay_GUI.dt__static;
 import java.io.IOException;
 /**
  *
@@ -16,6 +18,7 @@ import java.io.IOException;
  */
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,8 +29,9 @@ import java.util.logging.Logger;
  * @author QUANG DIEN
  */
 public class PayReport_Dialog extends javax.swing.JDialog {
-    private Book1 book;
-    private static Map<String, Integer> slMoi = new HashMap<>();
+    private DetailBC book;
+    private StatisticsBUS stt;
+
     /**
      * Creates new form PayReport_Dialog
      */
@@ -35,17 +39,17 @@ public class PayReport_Dialog extends javax.swing.JDialog {
         super(parent, modal);
         setLocation(600,150);
         initComponents();
-        book = new Book1();
-        book = Pay_GUI.b__static;
-        this.txtTenSach.setText(book.getTenSach());
-        this.txtTacGia.setText(book.getAuthor());
-        this.txtGiaCuon.setText(String.valueOf(book.getCost()));       
+        book = new DetailBC();
+        book = Pay_GUI.dt__static;
+        this.txtTenSach.setText(book.getBookname());
+        String author ="";
+        for (Iterator<String> it = book.getAuthorname().iterator(); it.hasNext();) {
+                author = author + it.next();
+            }
+        this.txtTacGia.setText(author);
+        this.txtGiaCuon.setText(String.valueOf(book.getBookCost()));       
             
         pack();
-    }
-
-    public static void UpdateNumBook(String isbn, int num) {
-        slMoi.put(isbn, num);
     }
 
     /**
@@ -58,133 +62,132 @@ public class PayReport_Dialog extends javax.swing.JDialog {
     private void initComponents() {
 
         panelBorder_Statistic_Blue1 = new MyDesign.PanelBorder_Statistic_Blue();
-        panelBorder_Basic1 = new MyDesign.PanelBorder_Basic();
-        jLabel9 = new javax.swing.JLabel();
-        txtTenSach = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        txtTacGia = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
-        txtGiaCuon = new MyDesign.MyTextField_Basic();
-        lbLine = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        txtDenBu = new javax.swing.JLabel();
-        myButton1 = new MyDesign.MyButton();
-        snSoLuongMat = new javax.swing.JSpinner();
+        panelBorder_Basic2 = new MyDesign.PanelBorder_Basic();
+        jLabel13 = new javax.swing.JLabel();
+        txtTenSach1 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        txtTacGia1 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        jLabel16 = new javax.swing.JLabel();
+        txtGiaCuon1 = new MyDesign.MyTextField_Basic();
+        lbLine1 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txtDenBu1 = new javax.swing.JLabel();
+        myButton2 = new MyDesign.MyButton();
+        snSoLuongMat1 = new javax.swing.JSpinner();
         jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jLabel9.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
-        jLabel9.setText("Tên sách");
+        jLabel13.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
+        jLabel13.setText("Tên sách");
 
-        txtTenSach.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        txtTenSach.setText("Một chiều cô đơn");
+        txtTenSach1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtTenSach1.setText("Một chiều cô đơn");
 
-        jLabel10.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
-        jLabel10.setText("Tác giả");
+        jLabel14.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
+        jLabel14.setText("Tác giả");
 
-        txtTacGia.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        txtTacGia.setText("Lâm Chấn Huy");
+        txtTacGia1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtTacGia1.setText("Lâm Chấn Huy");
 
-        jLabel11.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
-        jLabel11.setText("Số lượng mất");
+        jLabel15.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
+        jLabel15.setText("Số lượng mất");
 
-        jLabel12.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
-        jLabel12.setText("Giá/cuốn");
+        jLabel16.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
+        jLabel16.setText("Giá/cuốn");
 
-        txtGiaCuon.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(229, 229, 229)));
-        txtGiaCuon.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtGiaCuon.setText("20.000");
+        txtGiaCuon1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(229, 229, 229)));
+        txtGiaCuon1.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtGiaCuon1.setText("20.000");
 
-        lbLine.setForeground(new java.awt.Color(204, 204, 204));
-        lbLine.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
+        lbLine1.setForeground(new java.awt.Color(204, 204, 204));
+        lbLine1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(204, 204, 204)));
 
-        jLabel2.setForeground(new java.awt.Color(127, 127, 127));
-        jLabel2.setText("Đền bù");
+        jLabel4.setForeground(new java.awt.Color(127, 127, 127));
+        jLabel4.setText("Đền bù");
 
-        txtDenBu.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
-        txtDenBu.setText("40.000đ");
+        txtDenBu1.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
 
-        myButton1.setBackground(new java.awt.Color(22, 113, 221));
-        myButton1.setForeground(new java.awt.Color(255, 255, 255));
-        myButton1.setText("Xác nhận");
-        myButton1.setBorderColor(new java.awt.Color(22, 113, 221));
-        myButton1.setColor(new java.awt.Color(22, 113, 221));
-        myButton1.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
-        myButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+        myButton2.setBackground(new java.awt.Color(22, 113, 221));
+        myButton2.setForeground(new java.awt.Color(255, 255, 255));
+        myButton2.setText("Xác nhận");
+        myButton2.setBorderColor(new java.awt.Color(22, 113, 221));
+        myButton2.setColor(new java.awt.Color(22, 113, 221));
+        myButton2.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        myButton2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                myButton1MouseClicked(evt);
+                myButton2MouseClicked(evt);
             }
         });
 
-        snSoLuongMat.addChangeListener(new javax.swing.event.ChangeListener() {
+        snSoLuongMat1.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                snSoLuongMatStateChanged(evt);
+                snSoLuongMat1StateChanged(evt);
             }
         });
 
-        javax.swing.GroupLayout panelBorder_Basic1Layout = new javax.swing.GroupLayout(panelBorder_Basic1);
-        panelBorder_Basic1.setLayout(panelBorder_Basic1Layout);
-        panelBorder_Basic1Layout.setHorizontalGroup(
-            panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder_Basic1Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelBorder_Basic2Layout = new javax.swing.GroupLayout(panelBorder_Basic2);
+        panelBorder_Basic2.setLayout(panelBorder_Basic2Layout);
+        panelBorder_Basic2Layout.setHorizontalGroup(
+            panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder_Basic2Layout.createSequentialGroup()
                 .addContainerGap(35, Short.MAX_VALUE)
-                .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(lbLine, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(panelBorder_Basic1Layout.createSequentialGroup()
-                            .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel10)
-                                .addComponent(jLabel9)
-                                .addComponent(jLabel11)
-                                .addComponent(jLabel12))
+                .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(lbLine1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(panelBorder_Basic2Layout.createSequentialGroup()
+                            .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel14)
+                                .addComponent(jLabel13)
+                                .addComponent(jLabel15)
+                                .addComponent(jLabel16))
                             .addGap(24, 24, 24)
-                            .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(txtTacGia, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
-                                .addComponent(txtGiaCuon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtTenSach)
-                                .addComponent(snSoLuongMat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(panelBorder_Basic1Layout.createSequentialGroup()
-                        .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder_Basic1Layout.createSequentialGroup()
-                                .addComponent(jLabel2)
+                            .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtTacGia1, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                                .addComponent(txtGiaCuon1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(txtTenSach1)
+                                .addComponent(snSoLuongMat1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(panelBorder_Basic2Layout.createSequentialGroup()
+                        .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder_Basic2Layout.createSequentialGroup()
+                                .addComponent(jLabel4)
                                 .addGap(140, 140, 140))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder_Basic1Layout.createSequentialGroup()
-                                .addComponent(txtDenBu)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBorder_Basic2Layout.createSequentialGroup()
+                                .addComponent(txtDenBu1)
                                 .addGap(120, 120, 120)))
-                        .addComponent(myButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(myButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(35, 35, 35))
         );
-        panelBorder_Basic1Layout.setVerticalGroup(
-            panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelBorder_Basic1Layout.createSequentialGroup()
+        panelBorder_Basic2Layout.setVerticalGroup(
+            panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelBorder_Basic2Layout.createSequentialGroup()
                 .addGap(25, 25, 25)
-                .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(txtTenSach))
+                .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(txtTenSach1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10)
-                    .addComponent(txtTacGia))
+                .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel14)
+                    .addComponent(txtTacGia1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel11)
-                    .addComponent(snSoLuongMat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel15)
+                    .addComponent(snSoLuongMat1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtGiaCuon, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel12))
+                .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtGiaCuon1, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel16))
                 .addGap(18, 18, 18)
-                .addComponent(lbLine)
+                .addComponent(lbLine1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelBorder_Basic1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(panelBorder_Basic1Layout.createSequentialGroup()
-                        .addComponent(jLabel2)
+                .addGroup(panelBorder_Basic2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(panelBorder_Basic2Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
                         .addGap(0, 0, 0)
-                        .addComponent(txtDenBu, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelBorder_Basic1Layout.createSequentialGroup()
-                        .addComponent(myButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtDenBu1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelBorder_Basic2Layout.createSequentialGroup()
+                        .addComponent(myButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(1, 1, 1)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -203,7 +206,7 @@ public class PayReport_Dialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(panelBorder_Statistic_Blue1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelBorder_Basic1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelBorder_Basic2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelBorder_Statistic_Blue1Layout.setVerticalGroup(
@@ -212,7 +215,7 @@ public class PayReport_Dialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelBorder_Basic1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(panelBorder_Basic2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -230,37 +233,43 @@ public class PayReport_Dialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void snSoLuongMatStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_snSoLuongMatStateChanged
-        // TODO add your handling code here:
-        int soLuong = (int) snSoLuongMat.getValue();
-
-                if (soLuong > book.getStoreNum()) {
-                    snSoLuongMat.setValue(book.getStoreNum());
-                    soLuong = book.getStoreNum();
-                }
-
-                if (b__static != null) {
-                    float giaCuonSach = b__static.getCost();
-                    float tienCanDenBu = soLuong * giaCuonSach;
-
-                    txtDenBu.setText(String.valueOf(tienCanDenBu+"đ"));
-                }
-    }//GEN-LAST:event_snSoLuongMatStateChanged
-
-    private void myButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_myButton1MouseClicked
+    private void myButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_myButton2MouseClicked
         // TODO add your handling code here:
         try {
+
+            int soLuong = (int) snSoLuongMat.getValue();
+            float total = soLuong * dt__static.getBookCost();
+
             PayBUS pbus =new PayBUS();
-            pbus.BooksLost(bc__static);
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();;
-        } catch (SQLException ex) {
-            Logger.getLogger(PayReport_Dialog.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(PayReport_Dialog.class.getName()).log(Level.SEVERE, null, ex);
+            stt = new StatisticsBUS();
+
+            pbus.BooksLost(bc__static, soLuong, dt__static.getISBN());
+            stt.BooksLost(bc__static.getRealReDate(), soLuong);
+            stt.SoTienThu( bc__static.getRealReDate(),total);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         dispose();
-    }//GEN-LAST:event_myButton1MouseClicked
+    }//GEN-LAST:event_myButton2MouseClicked
+
+    private void snSoLuongMat1StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_snSoLuongMat1StateChanged
+        // TODO add your handling code here:
+        // TODO add your handling code here:
+        int soLuong = (int) snSoLuongMat.getValue();
+        if(soLuong<0) return;
+        if (soLuong > book.getNum()) {
+        snSoLuongMat.setValue(book.getNum());
+        soLuong = book.getNum();
+        }
+
+        if (dt__static!= null) {
+            float giaCuonSach = Float.parseFloat(txtGiaCuon.getText());
+            float tienCanDenBu = soLuong * giaCuonSach;
+            txtDenBu.setText(String.valueOf(tienCanDenBu+"đ"));
+        }   
+     
+    }//GEN-LAST:event_snSoLuongMat1StateChanged
 
     /**
      * @param args the command line arguments
@@ -308,17 +317,30 @@ public class PayReport_Dialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel lbLine;
+    private javax.swing.JLabel lbLine1;
     private MyDesign.MyButton myButton1;
+    private MyDesign.MyButton myButton2;
     private MyDesign.PanelBorder_Basic panelBorder_Basic1;
+    private MyDesign.PanelBorder_Basic panelBorder_Basic2;
     private MyDesign.PanelBorder_Statistic_Blue panelBorder_Statistic_Blue1;
     private javax.swing.JSpinner snSoLuongMat;
+    private javax.swing.JSpinner snSoLuongMat1;
     private javax.swing.JLabel txtDenBu;
+    private javax.swing.JLabel txtDenBu1;
     private MyDesign.MyTextField_Basic txtGiaCuon;
+    private MyDesign.MyTextField_Basic txtGiaCuon1;
     private javax.swing.JLabel txtTacGia;
+    private javax.swing.JLabel txtTacGia1;
     private javax.swing.JLabel txtTenSach;
+    private javax.swing.JLabel txtTenSach1;
     // End of variables declaration//GEN-END:variables
 }

@@ -40,7 +40,7 @@ public class BorrowCardDAO{
                     obj.setstatus(rs.getBoolean("isActive"));
                     listticket.add(obj);
                     for(int i=0;i<listticket.size();i++) {
-             		String tmp="select book.name, detail_borrow_card.num, detail_borrow_card.lost, cp_book.ISBN\r\n"
+             		String tmp="select book.name, detail_borrow_card.num, detail_borrow_card.lost, cp_book.ISBN, cp_book.Cost\r\n"
              				+ "from borrow_card join detail_borrow_card on borrow_card.id=detail_borrow_card.bcID \r\n"
              				+ "				join cp_book on detail_borrow_card.ISBN=cp_book.ISBN \r\n"
              				+ "				join book on cp_book.bookID=book.id \r\n"
@@ -55,6 +55,7 @@ public class BorrowCardDAO{
                             b.setNum(rs1.getInt(2));
                             b.setLost(rs1.getInt(3));
                             b.setISBN(rs1.getString(4));
+                            b.setBookCost(rs1.getFloat(5));
                             String t="select author.name\r\n"
                                             + "from cp_book join book_author on cp_book.ISBN=book_author.ISBN \r\n"
                                             + "			join author on book_author.authorID=author.id\r\n"
@@ -208,7 +209,7 @@ public class BorrowCardDAO{
         connectDB.connect();
         if(ConnectDB.conn != null){
             try {
-                String sql = "UPDATE borrow_card SET status = 0 WHERE id =?";
+                String sql = "UPDATE borrow_card SET isActive = 0 WHERE id =?";
                 PreparedStatement pst = connectDB.conn.prepareCall(sql);
                 pst.setInt(1, bc.getID());
                 pst.executeUpdate();
@@ -230,23 +231,87 @@ public class BorrowCardDAO{
         }
     }   
     
-    public void BooksLost(BorrowCard bc) throws ClassNotFoundException, SQLException{
+    public void BooksLost(BorrowCard bc, int lost, String ISBN) throws ClassNotFoundException, SQLException{
         connectDB.connect();
         if(ConnectDB.conn != null){
             try {
                 String sql = "UPDATE cp_book\n" +
-                                "SET storeNum = storeNum - dBC.num\n" +
+                                "SET storeNum = storeNum - ?\n" +
                                 "FROM cp_book cpB\n" +
                                 "JOIN detail_borrow_card dBC ON dBC.ISBN = cpB.ISBN \n" +
                                 "JOIN borrow_card bc ON bc.id = dBC.bcID\n" +
-                                "WHERE bc.id = ?";
+                                "WHERE bc.id = ? AND dBC.ISBN = ?";
                 PreparedStatement pst = connectDB.conn.prepareCall(sql);
-                pst.setInt(1, bc.getID());
+                pst.setInt(1, lost);
+                pst.setInt(2, bc.getID());
+                pst.setString(3, ISBN);
                 pst.executeUpdate();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 connectDB.disconnect();
+            }
+        }
+    }
+    
+    public void getRealDate(int id, java.sql.Date realDate) throws SQLException, ClassNotFoundException, IOException{
+        connectDB.connect();
+        if(ConnectDB.conn != null){
+        try {
+            String sql = "UPDATE borrow_card SET realReDate = ? WHERE id = ?";
+            PreparedStatement pst = ConnectDB.conn.prepareCall(sql); 
+            java.sql.Date rDate = new java.sql.Date(realDate.getTime());
+            pst.setDate(1, rDate);
+            pst.setInt(2, id);
+            pst.executeUpdate();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        } 
+        finally {
+            connectDB.disconnect();
+            }
+        }
+    }
+    
+    public void BanAcc(int id, java.sql.Date fineDate) throws SQLException, SQLException, SQLException, SQLException, SQLException{
+        connectDB.connect();
+        if(ConnectDB.conn != null){
+            try {
+                String sql = "UPDATE reader \n" +
+                                "SET fineDate = ?, isActive = 0\n" +
+                                "FROM reader\n" +
+                                "JOIN borrow_card bc ON bc.readerID = reader.id\n" +
+                                "WHERE bc.id = ?";
+                PreparedStatement pst = ConnectDB.conn.prepareCall(sql);
+                java.sql.Date date = new java.sql.Date(fineDate.getTime());
+                pst.setDate(1, date);
+                pst.setInt(2, id);
+                pst.executeUpdate();
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                connectDB.disconnect();
+            }
+        }
+    }
+    
+    public  void UnlockAcc() throws ClassNotFoundException, SQLException, IOException{
+        connectDB.connect();
+        if(ConnectDB.conn != null){
+            try {
+                String sql = "UPDATE reader \n" +
+                                "SET fineDate = NULL, isActive = 1\n" +
+                                "WHERE isActive = 0"+
+                                "AND DATEADD(DAY, 7, fineDate) <= GETDATE();";                             
+                PreparedStatement pst = ConnectDB.conn.prepareCall(sql);
+                pst.executeUpdate();
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+               connectDB.disconnect();
             }
         }
     }

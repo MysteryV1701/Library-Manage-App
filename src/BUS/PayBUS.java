@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package BUS;
 
 import DAO.BorrowCardDAO;
@@ -36,8 +32,27 @@ public class PayBUS {
          
      } 
     public void BooksLost(BorrowCard bc) throws ClassNotFoundException, SQLException, IOException{
-        borrowCardDAO = new BorrowCardDAO();
-        borrowCardDAO.BooksLost(bc);
+        
     }
+    
+    public void BooksLost(BorrowCard bc, int lost, String ISBN) throws ClassNotFoundException, SQLException, IOException{
+         borrowCardDAO = new BorrowCardDAO();
+         borrowCardDAO.BooksLost(bc, lost, ISBN);
+     }
+     
+     public void getRealDate(int id, Date realDate) throws ClassNotFoundException, SQLException, IOException{
+        borrowCardDAO = new BorrowCardDAO();
+        borrowCardDAO.getRealDate(id, (java.sql.Date) realDate);
+     }
+     
+      public void banAcc(int id, Date fineDate) throws ClassNotFoundException, SQLException, IOException{
+        borrowCardDAO = new BorrowCardDAO();
+        borrowCardDAO.BanAcc(id, (java.sql.Date) fineDate);
+     }
+      
+     public void UnlockAcc() throws ClassNotFoundException, SQLException, IOException{
+         borrowCardDAO = new BorrowCardDAO();
+        borrowCardDAO.UnlockAcc();
+     }
 
 }

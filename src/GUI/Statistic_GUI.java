@@ -4,34 +4,237 @@
  */
 package GUI;
 
+import BUS.ReaderBUS;
+import BUS.StatisticsBUS;
+import DTO.entities.*;
+
 import MyDesign.ScrollBar;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Vector;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author QUANG DIEN
  */
 public class Statistic_GUI extends javax.swing.JPanel {
-
+    private StatisticsBUS sBus;
+    private int yearSTT;
+    private int quarterSTT;
+    private int monthSTT;
+    DefaultTableModel tableModel;
     /**
      * Creates new form statistic_GUI
      */
     public Statistic_GUI() {
         initComponents();
         // add row table    
+        try {
+            sBus = new StatisticsBUS();
+            ShowAll();
+            sBus.NumberBC();
+       } catch (Exception e) {
+          e.printStackTrace();
+        }
         spTable.setVerticalScrollBar(new ScrollBar());
         spTable.getVerticalScrollBar().setBackground(Color.WHITE);
         spTable.getViewport().setBackground(Color.WHITE);
         JPanel p = new JPanel();
         p.setBackground(Color.WHITE);
         spTable.setCorner(JScrollPane.UPPER_RIGHT_CORNER, p);
-        tbStatistic.addRow(new Object[]{"01","Một đêm không ngủ", "Nguyễn Tuấn", "NXB Tuổi trẻ", "201"});
-        tbStatistic.addRow(new Object[]{"02","Giải tích 1", "Nguyễn Huy Hoàng", "SGU", "112"});
-        tbStatistic.addRow(new Object[]{"03","Phân tích thiết kế HTTT", "Lâm Chấn Huy", "NXB Toán học", "98"});
-        tbStatistic.addRow(new Object[]{"04","Tình yêu là gì?", "Lê Huy Khang", "NXB Giáo dục", "32"});
+    }
+    
+    private void ShowAll(){
+       try {
+            StatisticDTO stt = new StatisticDTO();
+            tableModel = (DefaultTableModel)tbStatistic.getModel();
+            ShowTopBook();
+            ReaderBUS rBUS = new ReaderBUS();
+            Vector<Reader> r = rBUS.getAll();
+            //Lấy tất cả thành viên
+            lbThanhVienMoi.setText(String.valueOf(r.size()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void ShowTopBook(){
+        try {
+            Vector<TopBorrowedBook> top = sBus.TopSachMuon();
+            tableModel.setRowCount(0);
+            int n = 1;
+            for (TopBorrowedBook b : top) {
+                Object[] r = {n++, b.getNameBook(), b.getBookAuthor(), b.getNXB(), b.getSoLuotMuon()};
+                tableModel.addRow(r);
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+   
+    //tạo menu con
+    private void showSelection(JPopupMenu popupMenu) {
+        Point location = cbThoiGian.getLocationOnScreen();
+        popupMenu.show(cbThoiGian, 0, cbThoiGian.getHeight());
+    }
+    
+    //Tạo menu con cho Selection
+    private JPopupMenu creatSelection(int start, int end, String prefix, ActionListener listener) {
+            JPopupMenu popupMenu = new JPopupMenu();
+            for (int i = start; i <= end; i++) {
+                JMenuItem menuItem = new JMenuItem(prefix + i);
+                menuItem.setFont(new Font("Arial", Font.PLAIN, 16));
+                menuItem.addActionListener(listener);
+                popupMenu.add(menuItem);
+        }
+        return popupMenu;
+    }
 
+    //Khi chọn jMenuItem
+    private void statisticSelection(ActionEvent event){
+        try {
+            JMenuItem source = (JMenuItem) (event.getSource());
+            String selectedItem = source.getText();
+            lbThoiGian.setText(selectedItem);
+            
+            if (selectedItem.startsWith("Tháng")) {
+                monthSTT = Integer.parseInt(selectedItem.substring(6));
+                showSelection(creatSelection(2023, 2027, "Năm ", this::yearSelection));
+            } 
+            else if (selectedItem.startsWith("Quý")) {
+                quarterSTT = Integer.parseInt(selectedItem.substring(4));
+                showSelection(creatSelection(2023, 2027, "Năm ", this::yearSelection));
+            } else if(selectedItem.startsWith("Năm")){
+                //Gọi hàm thống kê theo năm
+                int year = Integer.parseInt(selectedItem.substring(4));
+                if(monthSTT==0&&quarterSTT==0){statisticToYear(year);}
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    //Chọn năm cho JMenuItem
+    private void yearSelection(ActionEvent event) {
+        lbThoiGian.setText(lbThoiGian.getText() + " - " + ((JMenuItem) event.getSource()).getText());
+        JMenuItem source = (JMenuItem) (event.getSource());
+        String selectedItem = source.getText();
+
+        if (selectedItem.startsWith("Năm")) {
+            String yearString = selectedItem.substring( 4);
+            yearSTT = Integer.parseInt(yearString);
+        }
+        
+        //gọi hàm thống kê theo tháng
+        if(monthSTT != 0){statisticToMonth(monthSTT, yearSTT);}
+        monthSTT=0;
+        //gọi hàm thống kê theo quý
+        if(quarterSTT != 0){statisticToQuarter(quarterSTT,yearSTT);}
+        quarterSTT=0;
+    }
+    
+    //Thống kê theo tháng
+    private void statisticToMonth(int monthSelection, int yearSelection) {
+        try {
+            sBus = new StatisticsBUS();
+            Vector<StatisticDTO> datas = sBus.getAll();
+            float soTienThu = 0;
+            int soLuotMuon = 0;
+            int soLuotTra = 0;
+            float phanTramTra = 100;
+            int soSachMat = 0;
+            for (StatisticDTO dt : datas) {
+                int thang = dt.getThoiGian().getMonthValue();
+                int nam = dt.getThoiGian().getYear();
+                    if(thang == monthSelection && nam == yearSelection){
+                    soTienThu += dt.getBank();
+                    soLuotMuon += dt.getSoLuotMuonBC();
+                    soLuotTra += dt.getSoLuotTra();
+                    soSachMat += dt.getSoSachHong();     
+                }
+            }
+            if(soLuotMuon !=0){
+                phanTramTra = (soLuotTra*100)/soLuotMuon;
+            }
+            lbKhoangThu.setText(String.valueOf(soTienThu)+"đ");
+            lbSoLuotMuon.setText(String.valueOf(soLuotMuon));
+            lbTiLeHoanTra.setText(String.valueOf(phanTramTra)+"%");
+            lbSoSachMat.setText(String.valueOf(soSachMat));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Thống kê theo quý
+    private void statisticToQuarter(int quarterSelection, int yearSelection) {
+        try {
+            sBus = new StatisticsBUS();
+            Vector<StatisticDTO> datas = sBus.getAll();
+            float soTienThu = 0;
+            int soLuotMuon = 0;
+            int soLuotTra = 0;
+            float phanTramTra = 100;
+            int soSachMat = 0;
+            for (StatisticDTO dt : datas) {
+                int thang = dt.getThoiGian().getMonthValue();
+                int nam = dt.getThoiGian().getYear();
+                    if((thang-1)/3+1 == quarterSelection && nam == yearSelection){
+                    soTienThu += dt.getBank();
+                    soLuotMuon += dt.getSoLuotMuonBC();
+                    soLuotTra += dt.getSoLuotTra();
+                    soSachMat += dt.getSoSachHong();     
+                }
+            }
+            if(soLuotMuon !=0){
+                phanTramTra = (soLuotTra*100)/soLuotMuon;
+            }
+            lbKhoangThu.setText(String.valueOf(soTienThu)+"đ");
+            lbSoLuotMuon.setText(String.valueOf(soLuotMuon));
+            lbTiLeHoanTra.setText(String.valueOf(phanTramTra)+"%");
+            lbSoSachMat.setText(String.valueOf(soSachMat));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Thống kê theo năm
+    private void statisticToYear(int yearSelection) throws ClassNotFoundException {
+        try {
+            sBus = new StatisticsBUS();
+            Vector<StatisticDTO> datas = sBus.getAll();
+            float soTienThu = 0;
+            int soLuotMuon = 0;
+            int soLuotTra = 0;
+            float phanTramTra = 100;
+            int soSachMat = 0;
+            for (StatisticDTO dt : datas) {
+                int nam = dt.getThoiGian().getYear();
+                    if(nam == yearSelection){
+                    soTienThu += dt.getBank();
+                    soLuotMuon += dt.getSoLuotMuonBC();
+                    soLuotTra += dt.getSoLuotTra();
+                    soSachMat += dt.getSoSachHong();     
+                }
+            }
+            if(soLuotMuon !=0){
+                phanTramTra = (soLuotTra*100)/soLuotMuon;
+            }
+            lbKhoangThu.setText(String.valueOf(soTienThu)+"đ");
+            lbSoLuotMuon.setText(String.valueOf(soLuotMuon));
+            lbTiLeHoanTra.setText(String.valueOf(phanTramTra)+"%");
+            lbSoSachMat.setText(String.valueOf(soSachMat));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -43,23 +246,25 @@ public class Statistic_GUI extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        pnThanhVienMoi = new MyDesign.PanelBorder();
+        jLabel4 = new javax.swing.JLabel();
+        lbThanhVienMoi = new javax.swing.JLabel();
+        pnThoiGian = new javax.swing.JPanel();
+        lbThoiGian = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        pnSoLuotMuon = new MyDesign.PanelBorder_Statistic_Blue();
+        jLabel6 = new javax.swing.JLabel();
+        lbSoLuotMuon = new javax.swing.JLabel();
         cbThoiGian = new javax.swing.JComboBox<>();
         pnKhoangThu = new MyDesign.PanelBorder();
         jLabel2 = new javax.swing.JLabel();
         lbKhoangThu = new javax.swing.JLabel();
-        pnTiLeHoanTra = new MyDesign.PanelBorder();
-        jLabel3 = new javax.swing.JLabel();
-        lbTiLeHoanTra = new javax.swing.JLabel();
-        pnThanhVienMoi = new MyDesign.PanelBorder();
-        jLabel4 = new javax.swing.JLabel();
-        lbThanhVienMoi = new javax.swing.JLabel();
-        pnSoLuotMuon = new MyDesign.PanelBorder_Statistic_Blue();
-        jLabel6 = new javax.swing.JLabel();
-        lbSoLuotMuon = new javax.swing.JLabel();
         pnSoSachMat = new MyDesign.PanelBorder_Statistic_Red();
         jLabel7 = new javax.swing.JLabel();
         lbSoSachMat = new javax.swing.JLabel();
+        pnTiLeHoanTra = new MyDesign.PanelBorder();
+        jLabel3 = new javax.swing.JLabel();
+        lbTiLeHoanTra = new javax.swing.JLabel();
         panelBorder1 = new MyDesign.PanelBorder();
         jLabel5 = new javax.swing.JLabel();
         spTable = new javax.swing.JScrollPane();
@@ -67,83 +272,10 @@ public class Statistic_GUI extends javax.swing.JPanel {
 
         setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
-        jLabel1.setText("Thống kê theo");
-
-        cbThoiGian.setBackground(new java.awt.Color(246, 250, 255));
-        cbThoiGian.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
-        cbThoiGian.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tháng", "Quý", "Năm" }));
-        cbThoiGian.setBorder(null);
-        cbThoiGian.setPreferredSize(new java.awt.Dimension(77, 28));
-
-        pnKhoangThu.setPreferredSize(new java.awt.Dimension(445, 92));
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel2.setText("Khoảng thu");
-
-        lbKhoangThu.setFont(new java.awt.Font("SansSerif", 1, 48)); // NOI18N
-        lbKhoangThu.setForeground(new java.awt.Color(22, 113, 221));
-        lbKhoangThu.setText("120.000.000đ");
-
-        javax.swing.GroupLayout pnKhoangThuLayout = new javax.swing.GroupLayout(pnKhoangThu);
-        pnKhoangThu.setLayout(pnKhoangThuLayout);
-        pnKhoangThuLayout.setHorizontalGroup(
-            pnKhoangThuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnKhoangThuLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
-                .addComponent(lbKhoangThu)
-                .addGap(14, 14, 14))
-        );
-        pnKhoangThuLayout.setVerticalGroup(
-            pnKhoangThuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnKhoangThuLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(jLabel2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnKhoangThuLayout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
-                .addComponent(lbKhoangThu)
-                .addContainerGap())
-        );
-
-        pnTiLeHoanTra.setPreferredSize(new java.awt.Dimension(217, 92));
-
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel3.setText("Tỉ lệ hoàn trả");
-
-        lbTiLeHoanTra.setFont(new java.awt.Font("SansSerif", 1, 48)); // NOI18N
-        lbTiLeHoanTra.setForeground(new java.awt.Color(22, 113, 221));
-        lbTiLeHoanTra.setText("100%");
-
-        javax.swing.GroupLayout pnTiLeHoanTraLayout = new javax.swing.GroupLayout(pnTiLeHoanTra);
-        pnTiLeHoanTra.setLayout(pnTiLeHoanTraLayout);
-        pnTiLeHoanTraLayout.setHorizontalGroup(
-            pnTiLeHoanTraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnTiLeHoanTraLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(jLabel3)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnTiLeHoanTraLayout.createSequentialGroup()
-                .addContainerGap(91, Short.MAX_VALUE)
-                .addComponent(lbTiLeHoanTra)
-                .addContainerGap())
-        );
-        pnTiLeHoanTraLayout.setVerticalGroup(
-            pnTiLeHoanTraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnTiLeHoanTraLayout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addComponent(jLabel3)
-                .addGap(0, 0, 0)
-                .addComponent(lbTiLeHoanTra, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         pnThanhVienMoi.setPreferredSize(new java.awt.Dimension(217, 92));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel4.setText("Thành viên mới");
+        jLabel4.setText("Số thành viên");
 
         lbThanhVienMoi.setFont(new java.awt.Font("SansSerif", 1, 48)); // NOI18N
         lbThanhVienMoi.setForeground(new java.awt.Color(22, 113, 221));
@@ -156,7 +288,7 @@ public class Statistic_GUI extends javax.swing.JPanel {
             .addGroup(pnThanhVienMoiLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addComponent(jLabel4)
-                .addContainerGap(101, Short.MAX_VALUE))
+                .addContainerGap(117, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnThanhVienMoiLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lbThanhVienMoi)
@@ -171,6 +303,34 @@ public class Statistic_GUI extends javax.swing.JPanel {
                 .addComponent(lbThanhVienMoi, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        pnThoiGian.setBackground(new java.awt.Color(220, 220, 220));
+
+        lbThoiGian.setBackground(new java.awt.Color(255, 255, 255));
+        lbThoiGian.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        lbThoiGian.setForeground(new java.awt.Color(0, 204, 0));
+        lbThoiGian.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbThoiGian.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+
+        javax.swing.GroupLayout pnThoiGianLayout = new javax.swing.GroupLayout(pnThoiGian);
+        pnThoiGian.setLayout(pnThoiGianLayout);
+        pnThoiGianLayout.setHorizontalGroup(
+            pnThoiGianLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnThoiGianLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lbThoiGian, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnThoiGianLayout.setVerticalGroup(
+            pnThoiGianLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnThoiGianLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lbThoiGian, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jLabel1.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
+        jLabel1.setText("Thống kê theo");
 
         pnSoLuotMuon.setPreferredSize(new java.awt.Dimension(218, 92));
 
@@ -205,6 +365,49 @@ public class Statistic_GUI extends javax.swing.JPanel {
                 .addGap(5, 5, 5))
         );
 
+        cbThoiGian.setBackground(new java.awt.Color(246, 250, 255));
+        cbThoiGian.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        cbThoiGian.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tháng", "Quý", "Năm" }));
+        cbThoiGian.setBorder(null);
+        cbThoiGian.setPreferredSize(new java.awt.Dimension(77, 28));
+        cbThoiGian.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbThoiGianActionPerformed(evt);
+            }
+        });
+
+        pnKhoangThu.setPreferredSize(new java.awt.Dimension(445, 92));
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel2.setText("Khoảng thu");
+
+        lbKhoangThu.setFont(new java.awt.Font("SansSerif", 1, 48)); // NOI18N
+        lbKhoangThu.setForeground(new java.awt.Color(22, 113, 221));
+        lbKhoangThu.setText("120.000.000đ");
+
+        javax.swing.GroupLayout pnKhoangThuLayout = new javax.swing.GroupLayout(pnKhoangThu);
+        pnKhoangThu.setLayout(pnKhoangThuLayout);
+        pnKhoangThuLayout.setHorizontalGroup(
+            pnKhoangThuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnKhoangThuLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+                .addComponent(lbKhoangThu)
+                .addGap(14, 14, 14))
+        );
+        pnKhoangThuLayout.setVerticalGroup(
+            pnKhoangThuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnKhoangThuLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnKhoangThuLayout.createSequentialGroup()
+                .addContainerGap(24, Short.MAX_VALUE)
+                .addComponent(lbKhoangThu)
+                .addContainerGap())
+        );
+
         pnSoSachMat.setPreferredSize(new java.awt.Dimension(218, 92));
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -222,7 +425,7 @@ public class Statistic_GUI extends javax.swing.JPanel {
             .addGroup(pnSoSachMatLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
                 .addComponent(lbSoSachMat)
                 .addContainerGap())
         );
@@ -236,6 +439,38 @@ public class Statistic_GUI extends javax.swing.JPanel {
                 .addContainerGap(25, Short.MAX_VALUE)
                 .addComponent(lbSoSachMat)
                 .addGap(5, 5, 5))
+        );
+
+        pnTiLeHoanTra.setPreferredSize(new java.awt.Dimension(217, 92));
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel3.setText("Tỉ lệ hoàn trả");
+
+        lbTiLeHoanTra.setFont(new java.awt.Font("SansSerif", 1, 48)); // NOI18N
+        lbTiLeHoanTra.setForeground(new java.awt.Color(22, 113, 221));
+        lbTiLeHoanTra.setText("100%");
+
+        javax.swing.GroupLayout pnTiLeHoanTraLayout = new javax.swing.GroupLayout(pnTiLeHoanTra);
+        pnTiLeHoanTra.setLayout(pnTiLeHoanTraLayout);
+        pnTiLeHoanTraLayout.setHorizontalGroup(
+            pnTiLeHoanTraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnTiLeHoanTraLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel3)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnTiLeHoanTraLayout.createSequentialGroup()
+                .addContainerGap(88, Short.MAX_VALUE)
+                .addComponent(lbTiLeHoanTra)
+                .addContainerGap())
+        );
+        pnTiLeHoanTraLayout.setVerticalGroup(
+            pnTiLeHoanTraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnTiLeHoanTraLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(jLabel3)
+                .addGap(0, 0, 0)
+                .addComponent(lbTiLeHoanTra, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel5.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
@@ -281,7 +516,7 @@ public class Statistic_GUI extends javax.swing.JPanel {
                 .addGap(10, 10, 10)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spTable, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
+                .addComponent(spTable, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -291,32 +526,38 @@ public class Statistic_GUI extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(28, 28, 28)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(pnTiLeHoanTra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(pnThanhVienMoi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnSoSachMat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(pnSoSachMat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(panelBorder1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbThoiGian, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnKhoangThu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pnKhoangThu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cbThoiGian, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnSoLuotMuon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(panelBorder1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(28, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pnSoLuotMuon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(pnThoiGian, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(28, 28, 28))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(cbThoiGian, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
+                .addGap(8, 8, 8)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1)
+                        .addComponent(cbThoiGian, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pnThoiGian, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pnKhoangThu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(pnSoLuotMuon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -330,6 +571,25 @@ public class Statistic_GUI extends javax.swing.JPanel {
                 .addGap(10, 10, 10))
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cbThoiGianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbThoiGianActionPerformed
+        // TODO add your handling code here:
+        String selectedOption = (String) cbThoiGian.getSelectedItem();
+
+        switch (selectedOption) {
+            case "Tháng":
+            showSelection(creatSelection(1, 12, "Tháng ", this::statisticSelection));
+            break;
+            case "Quý":
+            showSelection(creatSelection(1, 4, "Quý ", this::statisticSelection));
+            break;
+            case "Năm":
+            showSelection(creatSelection(2023, 2027, "Năm ", this::statisticSelection));
+            break;
+            default:
+            break;
+        }
+    }//GEN-LAST:event_cbThoiGianActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -345,12 +605,14 @@ public class Statistic_GUI extends javax.swing.JPanel {
     private javax.swing.JLabel lbSoLuotMuon;
     private javax.swing.JLabel lbSoSachMat;
     private javax.swing.JLabel lbThanhVienMoi;
+    private javax.swing.JLabel lbThoiGian;
     private javax.swing.JLabel lbTiLeHoanTra;
     private MyDesign.PanelBorder panelBorder1;
     private MyDesign.PanelBorder pnKhoangThu;
     private MyDesign.PanelBorder_Statistic_Blue pnSoLuotMuon;
     private MyDesign.PanelBorder_Statistic_Red pnSoSachMat;
     private MyDesign.PanelBorder pnThanhVienMoi;
+    private javax.swing.JPanel pnThoiGian;
     private MyDesign.PanelBorder pnTiLeHoanTra;
     private javax.swing.JScrollPane spTable;
     private MyDesign.MyTable tbStatistic;
