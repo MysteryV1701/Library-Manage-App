@@ -275,7 +275,7 @@ public class Statistic_GUI extends javax.swing.JPanel {
         pnThanhVienMoi.setPreferredSize(new java.awt.Dimension(217, 92));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel4.setText("Số thành viên");
+        jLabel4.setText("Thành viên đang hoạt động");
 
         lbThanhVienMoi.setFont(new java.awt.Font("SansSerif", 1, 48)); // NOI18N
         lbThanhVienMoi.setForeground(new java.awt.Color(22, 113, 221));
@@ -288,7 +288,7 @@ public class Statistic_GUI extends javax.swing.JPanel {
             .addGroup(pnThanhVienMoiLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addComponent(jLabel4)
-                .addContainerGap(117, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnThanhVienMoiLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lbThanhVienMoi)
