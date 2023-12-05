@@ -1,5 +1,4 @@
 use libManager -- Author
-SELECT * FROM
 
 INSERT
     [dbo].[author] ([name], [isActive])

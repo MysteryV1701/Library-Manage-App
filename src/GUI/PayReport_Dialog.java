@@ -239,11 +239,13 @@ public class PayReport_Dialog extends javax.swing.JDialog {
         try {
 
             int soLuong = (int) snSoLuongMat1.getValue();
+            System.out.println("Số lượng: "+soLuong);
             float total = soLuong * dt__static.getBookCost();
 
             PayBUS pbus =new PayBUS();
 
             pbus.BooksLost(bc__static, soLuong, dt__static.getISBN());
+            System.out.println("ISBN: "+dt__static.getISBN());
 
         } catch (Exception e) {
             e.printStackTrace();

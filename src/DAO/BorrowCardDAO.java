@@ -323,7 +323,7 @@ public class BorrowCardDAO{
                 pst1.setInt(1, lost);
                 pst1.setString(2, ISBN);
                 pst1.setInt(3, bc.getID());
-                pst.executeUpdate();
+                pst1.executeUpdate();
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

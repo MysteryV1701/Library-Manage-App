@@ -30,10 +30,7 @@ public class PayBUS {
          borrowCardDAO = new BorrowCardDAO();
          borrowCardDAO.RecoverBook(bc);
          
-     } 
-    public void BooksLost(BorrowCard bc) throws ClassNotFoundException, SQLException, IOException{
-        
-    }
+     }
     
     public void BooksLost(BorrowCard bc, int lost, String ISBN) throws ClassNotFoundException, SQLException, IOException{
          borrowCardDAO = new BorrowCardDAO();

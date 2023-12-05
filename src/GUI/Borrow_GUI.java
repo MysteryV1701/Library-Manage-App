@@ -84,13 +84,13 @@ public class Borrow_GUI extends javax.swing.JPanel {
         spTable2.setCorner(JScrollPane.UPPER_RIGHT_CORNER, p);
         if(rolePermissionBUS.hasPerEdit(user.getRoleID(), 2)){
             btnChoMuon.setEnabled(true);
-            txtSoLuong.setEnabled(true);
+//            txtSoLuong.setEnabled(true);
             btnThem.setEnabled(true);
             btnTruSoLuong.setEnabled(true);
         }
         else{
             btnChoMuon.setEnabled(false);
-            txtSoLuong.setEnabled(false);
+//            txtSoLuong.setEnabled(false);
             btnThem.setEnabled(false);
             btnTruSoLuong.setEnabled(false);
         }

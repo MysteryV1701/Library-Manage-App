@@ -110,6 +110,12 @@ public class Pay_GUI extends javax.swing.JPanel {
         txtNgayMuon.setText(tableModel.getValueAt(i, 2).toString());
         txtThuKho.setText(tableModel.getValueAt(i, 4).toString());
         txtTienCoc.setText(String.valueOf(list.get(i).getdeposit())+"đ");
+        Date ngayNhan = list.get(i).getRealReDate();
+        if(ngayNhan!=null){
+            dtgNgayNhan.setDate(ngayNhan);
+        }else{
+            dtgNgayNhan.setDate(new Date());
+        }
         Vector<DetailBC> listBook = new Vector<DetailBC>(list.get(i).getListBook());
         DefaultTableModel Bookmodel = (DefaultTableModel) tbSach.getModel();
         Bookmodel.setRowCount(0);

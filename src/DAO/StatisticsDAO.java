@@ -37,7 +37,7 @@ public Vector<StatisticDTO> getAll() throws ClassNotFoundException, SQLException
         try {
             // Truy vấn 1
             String sql1 = "SELECT MONTH(bc.startDate) AS thang, YEAR(bc.startDate) AS nam, " +
-                          "SUM(CASE WHEN DATEDIFF(DAY, bc.startDate, bc.realReDate) <= 14 THEN 1 ELSE 0 END) AS tradunghan, COUNT(*) AS tongphieumuon " +
+                          "SUM(CASE WHEN DATEDIFF(DAY, bc.startDate, bc.realReDate) <= 14 THEN 1 ELSE 0 END) AS tradunghan, COUNT(bc.id) AS tongphieumuon " +
                           "FROM detail_borrow_card dBC JOIN cp_book cpB ON dBC.ISBN = cpB.ISBN " +
                           "JOIN borrow_card bc ON bc.id = dBC.bcID GROUP BY MONTH(bc.startDate), YEAR(bc.startDate)";
             PreparedStatement pst1 = ConnectDB.conn.prepareStatement(sql1);
