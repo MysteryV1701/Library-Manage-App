@@ -10,9 +10,14 @@
             <file>file:/D:/Learning/ProgramingLanguage/Java/JavaSwing/Library-Manage-App/src/GUI/Admin_GUI.java</file>
         </group>
         <group name="Group 20231016-06:29:43">
+            <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/BUS/PayBUS.java</file>
             <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/GUI/Borrow_GUI.java</file>
+            <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/GUI/PayReport_Dialog.java</file>
             <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/connection/DB.properties</file>
             <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/GUI/Statistic_GUI.java</file>
+            <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/DAO/BorrowCardDAO.java</file>
+            <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/DAO/StatisticsDAO.java</file>
+            <file>file:/D:/HK1_(2023-2024)/CNPM/Library-Manage-App/src/GUI/Pay_GUI.java</file>
         </group>
     </open-files>
 </project-private>
