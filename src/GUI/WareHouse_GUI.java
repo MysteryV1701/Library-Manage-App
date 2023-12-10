@@ -181,43 +181,44 @@ public class WareHouse_GUI extends javax.swing.JPanel {
             model.addRow(rowData);
         }
         
-//        tbLichSuNhapHang.addMouseListener(new MouseAdapter() {
-//        	public void mouseClicked(MouseEvent e)
-//        	{
-//                if (e.getClickCount() == 1 || e.getClickCount() == 2) {
-//                    DefaultTableModel model = (DefaultTableModel) tbLichSuNhapHang.getModel();
-//                    int selectedRow = tbLichSuNhapHang.getSelectedRow();
-//                    if (selectedRow >= 0) {
-//                        Object ngayNhap = tbLichSuNhapHang.getValueAt(selectedRow, 1);
-//
-//                        // Chuyển đổi ngày nhập từ Object sang định dạng phù hợp để truy vấn cơ sở dữ liệu
-//                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//                        String ngayNhapString = dateFormat.format(ngayNhap); // Định dạng ngày nhập
-//
-//                        // Gọi phương thức trong DAO để lấy danh sách chi tiết phiếu nhập dựa trên ngày nhập
-//                        List<SupplyCardDetail> supplyCardDetails = supplyCardDetailDAO.getSupplyCardDetailsByDate(ngayNhapString);
-//
-//                        // Xóa các dòng hiện tại trong bảng tbChiTietPhieuNhap
-//                        DefaultTableModel model2 = (DefaultTableModel) tbSach.getModel();
-//                        model2.setRowCount(0);
-//
-//                        // Thêm các chi tiết phiếu nhập mới vào bảng tbChiTietPhieuNhap
-//                        for (SupplyCardDetail detail : supplyCardDetails) {
-//                            Object[] rowData = {
-//                                    detail.getScID(),
-//                                    detail.getISBN(),
-//                                    detail.getNum()
-//                            };
-//                            model2.addRow(rowData);
-//                        }
-//                    }
-//                }
-//            }
-//        });
+        tbLichSuNhapHang.addMouseListener(new MouseAdapter() {
+        	public void mouseClicked(MouseEvent e)
+        	{
+                if (e.getClickCount() == 1 || e.getClickCount() == 2) {
+                    DefaultTableModel model = (DefaultTableModel) tbLichSuNhapHang.getModel();
+                    int selectedRow = tbLichSuNhapHang.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        Object ngayNhap = tbLichSuNhapHang.getValueAt(selectedRow, 1);
+
+                        // Chuyển đổi ngày nhập từ Object sang định dạng phù hợp để truy vấn cơ sở dữ liệu
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        String ngayNhapString = dateFormat.format(ngayNhap); // Định dạng ngày nhập
+
+                        // Gọi phương thức trong DAO để lấy danh sách chi tiết phiếu nhập dựa trên ngày nhập
+                        List<SupplyCardDetail> supplyCardDetails = supplyCardDetailDAO.getSupplyCardDetailsByDate(ngayNhapString);
+
+                        // Xóa các dòng hiện tại trong bảng tbChiTietPhieuNhap
+                        DefaultTableModel model2 = (DefaultTableModel) tbSach.getModel();
+                        model2.setRowCount(0);
+
+                        // Thêm các chi tiết phiếu nhập mới vào bảng tbChiTietPhieuNhap
+                        for (SupplyCardDetail detail : supplyCardDetails) {
+                            Object[] rowData = {
+                            		(Object)(model2.getRowCount()+1),
+                                    detail.getScID(),
+                                    detail.getISBN(),
+                                    detail.getNum()
+                            };
+                            model2.addRow(rowData);
+                        }
+                    }
+                }
+            }
+        });
         
         jLabel7.setFont(new java.awt.Font("SansSerif", 1, 16)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(127, 127, 127));
-        jLabel7.setText("Sách");
+        jLabel7.setText("Chi tiết phiếu nhập");
 
         spTable2.setBorder(null);
 
@@ -226,7 +227,7 @@ public class WareHouse_GUI extends javax.swing.JPanel {
 
             },
             new String [] {
-            		"STT", "Tên Sách", "Số lượng mượn", "Số lượng sách", "Tái bản", "NXB", "Giá"
+            		"STT", "Mã phiếu nhập", "Mã ISBN", "Số lượng nhập sách"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -238,18 +239,32 @@ public class WareHouse_GUI extends javax.swing.JPanel {
             }
         });
         
+//        DefaultTableModel model2 = (DefaultTableModel) tbSach.getModel();
+//
+//        for (WareHouseBook warehouseBook : warehouseBookList) {
+//            // Tạo một mảng các Object chứa thông tin cần hiển thị
+//            Object[] rowData = {
+//            	(Object)(model2.getRowCount()+1),
+//            	warehouseBook.getB().getName(),
+//            	warehouseBook.getW().getBorrowNum(),
+//            	warehouseBook.getW().getStoreNum(),
+//            	warehouseBook.getW().getEdition(),
+//            	warehouseBook.getP().getName(),
+//            	warehouseBook.getW().getCost()
+//            };
+//            model2.addRow(rowData);
+//        }
+        
         DefaultTableModel model2 = (DefaultTableModel) tbSach.getModel();
+        model2.setRowCount(0);
 
-        for (WareHouseBook warehouseBook : warehouseBookList) {
-            // Tạo một mảng các Object chứa thông tin cần hiển thị
+        // Thêm các chi tiết phiếu nhập mới vào bảng tbChiTietPhieuNhap
+        for (SupplyCardDetail detail : supplyCardDetail) {
             Object[] rowData = {
-            	(Object)(model2.getRowCount()+1),
-            	warehouseBook.getB().getName(),
-            	warehouseBook.getW().getBorrowNum(),
-            	warehouseBook.getW().getStoreNum(),
-            	warehouseBook.getW().getEdition(),
-            	warehouseBook.getP().getName(),
-            	warehouseBook.getW().getCost()
+            		(Object)(model2.getRowCount()+1),
+                    detail.getScID(),
+                    detail.getISBN(),
+                    detail.getNum()
             };
             model2.addRow(rowData);
         }
@@ -369,19 +384,16 @@ public class WareHouse_GUI extends javax.swing.JPanel {
                         }
                     	
                     	DefaultTableModel model2 = (DefaultTableModel) tbSach.getModel();
-                    	List<WareHouseBook> warehouseBookList = new ArrayList<>();
-                        warehouseBookList = warehouseDAO.getAllWarehouseBook();
+                    	List<SupplyCardDetail> supplyCardDetail = new ArrayList<>();
+                    	supplyCardDetail = supplyCardDetailDAO.getAllSupplyCardDetail();
                         model2.setRowCount(0);
-                    	for (WareHouseBook warehouseBook : warehouseBookList) {
+                    	for (SupplyCardDetail i : supplyCardDetail) {
                             // Tạo một mảng các Object chứa thông tin cần hiển thị
                             Object[] rowData = {
                             	(Object)(model2.getRowCount()+1),
-                            	warehouseBook.getB().getName(),
-                            	warehouseBook.getW().getBorrowNum(),
-                            	warehouseBook.getW().getStoreNum(),
-                            	warehouseBook.getW().getEdition(),
-                            	warehouseBook.getP().getName(),
-                            	warehouseBook.getW().getCost()
+                            	i.getScID(),
+                                i.getISBN(),
+                                i.getNum()
                             };
                             model2.addRow(rowData);
                         }
