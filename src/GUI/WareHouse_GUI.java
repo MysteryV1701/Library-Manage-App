@@ -279,7 +279,7 @@ public class WareHouse_GUI extends javax.swing.JPanel {
 
                     String searchInput = txtTimKiem.getText().trim();
                     String key = "NXB";
-                    String keyDate = "20-";
+                    String keyDate = "2023-";
                     if (!searchInput.isEmpty()) {
                     	if(!isNumeric(searchInput))
                     	{
@@ -305,7 +305,7 @@ public class WareHouse_GUI extends javax.swing.JPanel {
 
                     String searchInput = txtTimKiem.getText().trim();
                     String key = "NXB";
-                    String keyDate = "20-";
+                    String keyDate = "2023-";
                     if (!searchInput.isEmpty()) {
                     	if(!isNumeric(searchInput))
                     	{
